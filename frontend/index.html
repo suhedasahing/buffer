@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XNOR Guard · Güvenlik Paneli</title>
+<style>
+:root{--bg:#0c0f14;--panel:#141922;--panel2:#1b2231;--line:#252d3b;--txt:#e9eef6;--mut:#8a96a8;--warn:#f5b027;--crit:#ff4a4a;--ok:#35b27e}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,"Segoe UI",sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line)}
+h1{font-size:17px}
+.sp{flex:1}
+.pill{font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+.pill.on{color:var(--ok)} .pill.off{color:var(--crit)}
+button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit}
+button:hover:not(:disabled){background:#27324a}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,summary:focus-visible{outline:2px solid #6aa8ff;outline-offset:2px}
+button.danger{background:#5a1f22;border-color:#8a2c30}
+button.warnb{background:#4d3b0b;border-color:#7a5f12}
+button.big{padding:10px 16px;font-weight:700}
+details.demo{position:relative}
+details.demo summary{cursor:pointer;list-style:none;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
+details.demo div{position:absolute;right:0;top:36px;z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;width:190px}
+#status{display:flex;align-items:center;gap:16px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+#status .lvl{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
+#status .dot{width:12px;height:12px;border-radius:50%;background:var(--ok)}
+#status.warning{background:#2b2210} #status.warning .dot{background:var(--warn)}
+#status.critical{background:#321416} #status.critical .dot{background:var(--crit)}
+.stats{margin-left:auto;display:flex;gap:18px;color:var(--mut)} .stats b{color:var(--txt);font-size:16px;margin-left:4px}
+#banner{display:none;padding:10px 18px;font-weight:700;background:var(--warn);color:#201800;align-items:center;gap:12px}
+#banner.show{display:flex}
+main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+#cams{padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;align-content:start;overflow:auto}
+.cam{background:var(--panel);border:2px solid var(--line);border-radius:8px;overflow:hidden;cursor:zoom-in}
+.cam.warning{border-color:var(--warn)} .cam.critical{border-color:var(--crit)}
+.cam.big{grid-column:1/-1;cursor:zoom-out}
+.cam img{width:100%;display:block;background:#000;aspect-ratio:4/3;object-fit:cover}
+.cam.big img{aspect-ratio:16/9}
+.cam .t{padding:8px 12px;display:flex;gap:10px;align-items:center}
+.cam .t .fps{margin-left:auto;color:var(--mut);font-size:12px}
+.chip{font-size:12px;border-radius:99px;padding:1px 9px;border:1px solid var(--line);color:var(--mut)}
+.chip.ok{color:var(--ok);border-color:#235a43} .chip.bad{color:var(--crit);border-color:#7a2a2a} .chip.mute{color:var(--mut)}
+.chip.warning{color:var(--warn);border-color:#7a5f12} .chip.critical{color:var(--crit);border-color:#7a2a2a}
+aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.tabs button.on{background:#27324a;border-color:#3b4a6b}
+#log{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
+.row{background:var(--panel);border-left:5px solid var(--warn);border-radius:6px;padding:10px}
+.row.critical{border-left-color:var(--crit)}
+.row.ack{opacity:.75} .row.false_alarm{opacity:.4}
+.row .h{display:flex;justify-content:space-between;gap:8px}
+.row .m{color:var(--mut);font-size:12px;margin:2px 0 6px}
+.row img{width:100%;border-radius:4px;cursor:zoom-in}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+.btns{display:flex;gap:5px;flex-wrap:wrap} .btns button{font-size:12px;padding:4px 8px}
+.empty{color:var(--mut);padding:16px;text-align:center}
+#settings{border-top:1px solid var(--line);padding:10px 14px;background:var(--panel)}
+#settings summary{cursor:pointer;color:var(--mut)}
+#settings label{display:block;margin-top:10px;font-size:12px;color:var(--mut)}
+#settings input{width:100%}
+#vignette{position:fixed;inset:0;pointer-events:none;display:none;z-index:50;box-shadow:inset 0 0 0 6px var(--crit),inset 0 0 140px rgba(255,40,40,.6);animation:pulse .9s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.4}to{opacity:1}}
+#ocard{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:51;display:none;background:#3a1114;border:2px solid var(--crit);border-radius:10px;padding:14px 18px;min-width:min(560px,92vw);text-align:center}
+#ocard h2{font-size:20px;color:#fff;margin-bottom:4px} #ocard p{color:#ffc9c9;margin-bottom:10px}
+#ocard .btns{justify-content:center}
+.show{display:block}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:60;align-items:center;justify-content:center;cursor:zoom-out}
+#modal.show{display:flex} #modal img{max-width:92vw;max-height:92vh;border-radius:8px}
+@media (prefers-reduced-motion:reduce){#vignette{animation:none}}
+@media(max-width:950px){body{overflow:auto;height:auto}main{grid-template-columns:1fr}aside{border-left:0;border-top:1px solid var(--line)}#log{max-height:60vh}}
+</style>
+</head>
+<body>
+<header>
+  <h1>XNOR Guard</h1>
+  <span class="pill off" id="conn">bağlanıyor</span>
+  <span class="pill" id="p-cams">kamera: –</span>
+  <span class="pill" id="p-tg">Telegram: –</span>
+  <span class="sp"></span>
+  <button id="snd" onclick="toggleSound()">Sesi aç</button>
+  <details class="demo"><summary>Demo</summary><div>
+    <button class="warnb" onclick="sim('warning','fight')">Kavga (sarı)</button>
+    <button class="warnb" onclick="sim('warning','knife')">Bıçak (sarı)</button>
+    <button class="danger" onclick="sim('critical','gun')">Silah (kırmızı)</button>
+  </div></details>
+</header>
+
+<section id="status" class="normal">
+  <div class="lvl"><span class="dot"></span><span id="lvl-text">Okul durumu: normal</span></div>
+  <div class="stats">
+    <span>Açık alarm<b id="s-open">0</b></span><span>Sarı<b id="s-warn">0</b></span>
+    <span>Kırmızı<b id="s-crit">0</b></span><span>Yanlış alarm<b id="s-fa">0</b></span>
+  </div>
+</section>
+
+<div id="banner"><span id="banner-text"></span><button onclick="ackCurrent()">Görüldü</button></div>
+
+<main>
+  <section id="cams"></section>
+  <aside>
+    <div class="tabs">
+      <button data-f="all" class="on">Tümü</button><button data-f="warning">Sarı</button>
+      <button data-f="critical">Kırmızı</button><button data-f="open">Açık</button>
+    </div>
+    <div id="log"><div class="empty" id="empty">Henüz tehdit algılanmadı.</div></div>
+    <details id="settings"><summary>Hassasiyet ayarları</summary>
+      <label>Nesne güveni: <b id="v-conf"></b><input type="range" id="r-conf" min="0.15" max="0.9" step="0.05"></label>
+      <label>Kavga eşiği (düşük = daha hassas): <b id="v-fs"></b><input type="range" id="r-fs" min="2" max="9" step="0.5"></label>
+    </details>
+  </aside>
+</main>
+
+<div id="vignette"></div>
+<div id="ocard" role="alertdialog" aria-live="assertive">
+  <h2 id="o-title"></h2><p id="o-text"></p>
+  <div class="btns">
+    <button class="big" onclick="ackCurrent()">Görüldü, alarmı sustur</button>
+    <button class="big danger" onclick="act(curCrit,'call_police')">Polisi bildir</button>
+    <button class="big" onclick="act(curCrit,'false_alarm')">Yanlış alarm</button>
+  </div>
+</div>
+<div id="modal" onclick="this.classList.remove('show')"><img alt="Olay görüntüsü"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LBL = {gun:"Silah", handgun:"Tabanca", rifle:"Tüfek", knife:"Bıçak", fight:"Kavga / vurma", climb:"Tırmanma / izinsiz giriş", scissors:"Makas"};
+const ACT = {telegram_sent:"Telegram gönderildi", telegram_manual:"Telegram tekrar gönderildi",
+  principal_notified:"Müdür paneline uyarı", principal_called:"Müdür aranıyor", principal_called_manual:"Müdür manuel arandı",
+  police_notified:"Polise bildirildi", police_notified_manual:"Polise manuel bildirildi",
+  escalated:"Kritiğe yükseltildi", ack:"Görüldü", false_alarm:"Yanlış alarm"};
+const STATUS = {open:"açık", ack:"görüldü", false_alarm:"yanlış alarm"};
+const EV = new Map();
+let filter = "all", curCrit = null, curWarn = null, bannerTimer;
+
+/* ---------- Ses: sarı = kısa çift bip, kırmızı = sürekli siren ---------- */
+const Snd = {
+  ctx:null, on:false, siren:null,
+  enable(){ this.ctx = this.ctx || new AudioContext(); this.ctx.resume(); this.on = true; },
+  beep(f, t, d){ const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.frequency.value=f; o.connect(g); g.connect(this.ctx.destination);
+    g.gain.setValueAtTime(.2,t); g.gain.exponentialRampToValueAtTime(.001,t+d); o.start(t); o.stop(t+d); },
+  warning(){ if(!this.on) return; const t=this.ctx.currentTime; this.beep(660,t,.18); this.beep(660,t+.3,.18); },
+  startSiren(){
+    if(!this.on || this.siren) return;
+    const c=this.ctx, o=c.createOscillator(), lfo=c.createOscillator(), lg=c.createGain(), g=c.createGain();
+    o.type="sawtooth"; o.frequency.value=800; lfo.type="triangle"; lfo.frequency.value=1.4; lg.gain.value=260; g.gain.value=.13;
+    lfo.connect(lg); lg.connect(o.frequency); o.connect(g); g.connect(c.destination); o.start(); lfo.start();
+    this.siren={o,lfo}; this.timeout=setTimeout(()=>this.stopSiren(),120000);
+  },
+  stopSiren(){ clearTimeout(this.timeout); if(this.siren){ try{this.siren.o.stop();this.siren.lfo.stop();}catch(e){} this.siren=null; } }
+};
+function toggleSound(){
+  if(Snd.on){ Snd.on=false; Snd.stopSiren(); $("#snd").textContent="Sesi aç"; }
+  else { Snd.enable(); $("#snd").textContent="Ses açık"; Snd.warning(); if(curCrit) Snd.startSiren(); }
+}
+
+/* ---------- Kamera kartları ---------- */
+async function loadCameras(){
+  const cams = await (await fetch("/api/cameras")).json();
+  $("#cams").innerHTML = cams.map(c => `
+    <div class="cam" id="cam-${c.id}" onclick="this.classList.toggle('big')">
+      <img src="/video_feed/${c.id}" alt="${esc(c.name)}">
+      <div class="t"><b>${esc(c.name)}</b><span class="chip" id="st-${c.id}">normal</span><span class="fps" id="fps-${c.id}"></span></div>
+    </div>`).join("");
+  $("#p-cams").textContent = `kamera: ${cams.length}`;
+}
+async function pollCameras(){
+  try{
+    for(const c of await (await fetch("/api/cameras")).json()){
+      const st=$("#st-"+c.id); if(!st) continue;
+      st.textContent = {normal:"normal",warning:"dikkat",critical:"kritik"}[c.state]; st.className="chip "+(c.state==="normal"?"ok":c.state);
+      $("#fps-"+c.id).textContent = c.fps+" fps";
+      $("#cam-"+c.id).classList.toggle("warning", c.state==="warning");
+      $("#cam-"+c.id).classList.toggle("critical", c.state==="critical");
+    }
+  }catch(e){}
+}
+
+/* ---------- Olay listesi ---------- */
+function rowHTML(ev){
+  const chips = (ev.actions||[]).map(a=>{
+    const st = a.detail && a.detail.status, c = st==="failed"?"bad":st==="skipped"?"mute":"ok";
+    return `<span class="chip ${c}" title="${esc((a.detail&&(a.detail.error||a.detail.reason))||"")}">${ACT[a.action]||esc(a.action)}${st==="skipped"?" (ayarlı değil)":st==="failed"?" (başarısız)":""}</span>`;
+  }).join("");
+  return `<div class="h"><b>${ev.level==="critical"?"Kritik":"Potansiyel"} · ${LBL[ev.label]||esc(ev.label)} <small>%${Math.round(ev.conf*100)}</small></b>
+      <span>${new Date(ev.ts).toLocaleTimeString("tr-TR")}</span></div>
+    <div class="m">${esc(ev.camera_name)} · ${STATUS[ev.status]}${ev.escalated?" · yükseltildi":""}</div>
+    <img src="${ev.snapshot}" alt="Olay görüntüsü" onclick="zoom(this.src)" onerror="this.remove()">
+    <div class="chips">${chips}</div>
+    <div class="btns">
+      <button onclick="act('${ev.id}','ack')" ${ev.status==="open"?"":"disabled"}>Görüldü</button>
+      <button onclick="act('${ev.id}','call_principal')">Müdürü ara</button>
+      <button class="danger" onclick="act('${ev.id}','call_police')">Polisi bildir</button>
+      <button onclick="act('${ev.id}','telegram')">Telegram'a gönder</button>
+      <button onclick="act('${ev.id}','false_alarm')">Yanlış alarm</button>
+    </div>`;
+}
+function renderRow(ev){
+  $("#empty")?.remove();
+  let d = document.getElementById("row-"+ev.id);
+  if(!d){ d=document.createElement("div"); d.id="row-"+ev.id; $("#log").prepend(d); }
+  d.className = `row ${ev.level} ${ev.status}`; d.dataset.level=ev.level; d.dataset.status=ev.status;
+  d.innerHTML = rowHTML(ev); applyFilter(); updateStatus();
+}
+function applyFilter(){
+  document.querySelectorAll(".row").forEach(r=>{
+    r.style.display = filter==="all" || r.dataset.level===filter || (filter==="open" && r.dataset.status==="open") ? "" : "none";
+  });
+}
+function updateStatus(){
+  const all=[...EV.values()], open=all.filter(e=>e.status==="open");
+  $("#s-open").textContent=open.length; $("#s-warn").textContent=all.filter(e=>e.level==="warning").length;
+  $("#s-crit").textContent=all.filter(e=>e.level==="critical").length; $("#s-fa").textContent=all.filter(e=>e.status==="false_alarm").length;
+  const lvl = open.some(e=>e.level==="critical") ? "critical" : open.length ? "warning" : "normal";
+  $("#status").className = lvl;
+  $("#lvl-text").textContent = {normal:"Okul durumu: normal", warning:"Okul durumu: dikkat, onay bekleyen uyarı var", critical:"Okul durumu: KRİTİK tehdit"}[lvl];
+}
+
+/* ---------- Alarm gösterimi ---------- */
+function showCritical(ev, silent){
+  curCrit = ev.id;
+  $("#o-title").textContent = `KRİTİK TEHDİT: ${LBL[ev.label]||ev.label}`;
+  $("#o-text").textContent = `${ev.camera_name}. Müdür aranıyor, polise bildirim ve Telegram mesajı gönderiliyor.`;
+  $("#vignette").classList.add("show"); $("#ocard").classList.add("show"); $("#banner").classList.remove("show");
+  if(!silent) Snd.startSiren();
+}
+function hideCritical(){ curCrit=null; $("#vignette").classList.remove("show"); $("#ocard").classList.remove("show"); Snd.stopSiren(); }
+function showWarning(ev){
+  curWarn = ev.id;
+  $("#banner-text").textContent = `Olası tehdit: ${LBL[ev.label]||ev.label} · ${ev.camera_name}. Müdür paneline uyarı gitti, ${"{{S}}"} sn içinde onaylanmazsa kritiğe yükselir.`.replace("{{S}}", "45");
+  $("#banner").classList.add("show"); Snd.warning();
+  clearTimeout(bannerTimer); bannerTimer = setTimeout(()=>$("#banner").classList.remove("show"), 45000);
+}
+const ackCurrent = () => { const id = curCrit || curWarn; if(id) act(id,"ack"); };
+
+/* ---------- API ---------- */
+const act = (id, action) => id && fetch("/api/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_id:id, action})});
+const sim = (level,label) => fetch(`/api/simulate?level=${level}&label=${label}&camera=cam1`,{method:"POST"});
+const zoom = src => { $("#modal img").src=src; $("#modal").classList.add("show"); };
+
+function connect(){
+  const ws = new WebSocket(`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`);
+  let ping;
+  ws.onopen = () => { $("#conn").className="pill on"; $("#conn").textContent="canlı"; ping=setInterval(()=>ws.readyState===1&&ws.send("ping"),20000); };
+  ws.onclose = () => { clearInterval(ping); $("#conn").className="pill off"; $("#conn").textContent="bağlantı koptu"; setTimeout(connect,1500); };
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if(m.type==="alert"){ EV.set(m.event.id,m.event); renderRow(m.event); m.event.level==="critical" ? showCritical(m.event) : showWarning(m.event); }
+    if(m.type==="escalated"){ EV.set(m.event.id,m.event); renderRow(m.event); showCritical(m.event); }
+    if(m.type==="action"){
+      const ev = EV.get(m.event_id); if(!ev) return;
+      ev.actions.push({action:m.action, detail:m.detail}); if(m.status) ev.status=m.status;
+      renderRow(ev);
+      if(ev.status!=="open"){ if(curCrit===ev.id) hideCritical(); if(curWarn===ev.id){ curWarn=null; $("#banner").classList.remove("show"); } }
+    }
+  };
+}
+
+/* ---------- Ayarlar ---------- */
+async function loadSettings(){
+  const s = await (await fetch("/api/settings")).json();
+  $("#r-conf").value=s.conf; $("#v-conf").textContent=s.conf; $("#r-fs").value=s.fight_speed; $("#v-fs").textContent=s.fight_speed;
+  const tg=$("#p-tg"); tg.textContent = s.telegram ? "Telegram: bağlı" : "Telegram: ayarsız"; tg.className = "pill " + (s.telegram?"on":"");
+}
+function bindSettings(){
+  const send = () => { $("#v-conf").textContent=$("#r-conf").value; $("#v-fs").textContent=$("#r-fs").value;
+    fetch("/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({conf:+$("#r-conf").value, fight_speed:+$("#r-fs").value})}); };
+  $("#r-conf").onchange = send; $("#r-fs").onchange = send;
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); filter=b.dataset.f; applyFilter(); });
+}
+
+(async()=>{
+  bindSettings(); await loadCameras(); await loadSettings();
+  (await (await fetch("/api/logs")).json()).reverse().forEach(ev=>{ EV.set(ev.id,ev); renderRow(ev); });
+  const openCrit=[...EV.values()].find(e=>e.level==="critical" && e.status==="open"); if(openCrit) showCritical(openCrit,true);
+  connect(); setInterval(pollCameras,2000);
+})();
+</script>
+</body>
+</html>
