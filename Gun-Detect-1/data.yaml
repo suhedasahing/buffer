@@ -1,0 +1,14 @@
+names:
+- knife
+- pistol
+- rifle
+nc: 3
+roboflow:
+  license: CC BY 4.0
+  project: gun-detect-y1ogv
+  url: https://universe.roboflow.com/new-workspace-pnwnb/gun-detect-y1ogv/dataset/1
+  version: 1
+  workspace: new-workspace-pnwnb
+test: ../test/images
+train: ../train/images
+val: ../valid/images

@@ -1,0 +1,8 @@
+path: C:/Users/suhed/OneDrive/Desktop/xnor-guard/Gun-Detect-1
+train: train/images
+val: valid/images
+nc: 3
+names:
+  0: knife
+  1: pistol
+  2: rifle

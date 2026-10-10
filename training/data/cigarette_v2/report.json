@@ -1,0 +1,40 @@
+{
+  "class": "cigarette",
+  "sources": [
+    {
+      "name": "rf_smoking_detection",
+      "images": 552,
+      "boxes": 560,
+      "classes": {
+        "0": 560
+      },
+      "dropped_empty": 586,
+      "dropped_bad": 1727,
+      "splits": {
+        "train": 398,
+        "val": 110,
+        "test": 44
+      }
+    },
+    {
+      "name": "rf_cigarette_smokers",
+      "images": 8366,
+      "boxes": 11942,
+      "classes": {
+        "0": 11942
+      },
+      "dropped_empty": 52,
+      "dropped_bad": 63,
+      "splits": {
+        "train": 6668,
+        "val": 853,
+        "test": 845
+      }
+    }
+  ],
+  "totals": {
+    "train": 7066,
+    "val": 963,
+    "test": 889
+  }
+}

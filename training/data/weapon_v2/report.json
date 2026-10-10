@@ -1,0 +1,39 @@
+{
+  "class": "weapon",
+  "sources": [
+    {
+      "name": "gun_detect_1",
+      "images": 1836,
+      "boxes": 9479,
+      "classes": {
+        "0": 9479
+      },
+      "dropped_empty": 27,
+      "dropped_bad": 0,
+      "splits": {
+        "train": 1705,
+        "val": 131
+      }
+    },
+    {
+      "name": "weapon2_rf",
+      "images": 4084,
+      "boxes": 5071,
+      "classes": {
+        "0": 5071
+      },
+      "dropped_empty": 14,
+      "dropped_bad": 0,
+      "splits": {
+        "train": 3266,
+        "val": 408,
+        "test": 410
+      }
+    }
+  ],
+  "totals": {
+    "train": 4971,
+    "val": 539,
+    "test": 410
+  }
+}
