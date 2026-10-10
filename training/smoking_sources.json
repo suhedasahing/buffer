@@ -1,0 +1,25 @@
+{
+  "_docs": "Sigara icin tek hedef sinif: cigarette (0). Her kaynak indirildikten sonra README.roboflow.txt / data.yaml icindeki sinif sirayina gore class_map dogrulanmali; sira degisirse class_map guncelle.",
+  "sources": [
+    {
+      "name": "rf_smoking_detection",
+      "path": "../datasets/smoking-detection-dataset",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "valid", "dir": "valid"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"1": 0}
+    },
+    {
+      "name": "rf_cigarette_smokers",
+      "path": "../datasets/cigarette-smokers",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "valid", "dir": "valid"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"0": 0}
+    }
+  ]
+}

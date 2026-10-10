@@ -4,9 +4,11 @@ from pathlib import Path
 import httpx
 from . import config
 
-TITLES = {"warning": "🟡 POTANSİYEL TEHDİT", "critical": "🔴 KRİTİK TEHDİT"}
+TITLES = {"green": "🟢 GÖZLEM", "warning": "🟡 POTANSİYEL TEHDİT", "critical": "🔴 KRİTİK TEHDİT"}
 NAMES = {"gun": "Silah", "handgun": "Tabanca", "rifle": "Tüfek", "knife": "Bıçak",
-         "fight": "Kavga / vurma", "climb": "Tırmanma / izinsiz giriş", "scissors": "Makas"}
+         "fight": "Kavga / vurma", "climb": "Tırmanma / izinsiz giriş", "scissors": "Makas",
+         "suicide": "İntihar / camdan atlama", "cigarette": "Sigara", "loitering": "Şüpheli bekleyiş",
+         "smoking": "Sigara içme", "smoke": "Sigara/duman"}
 
 
 def configured() -> bool:

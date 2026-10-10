@@ -5,111 +5,166 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XNOR Guard · Güvenlik Paneli</title>
 <style>
-:root{--bg:#0c0f14;--panel:#141922;--panel2:#1b2231;--line:#252d3b;--txt:#e9eef6;--mut:#8a96a8;--warn:#f5b027;--crit:#ff4a4a;--ok:#35b27e}
+:root{
+  --bg:#eef0f8; --panel:#ffffff; --panel2:#f5f2ff; --line:#e3e6f0; --txt:#2b2f45; --mut:#8a90a6;
+  --ok:#2fb37a; --green:#2fb37a; --warn:#ffb020; --crit:#ff5b6a; --acc:#6c5ce7; --acc2:#a29bfe;
+}
 *{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,"Segoe UI",sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line)}
-h1{font-size:17px}
-.sp{flex:1}
-.pill{font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
-.pill.on{color:var(--ok)} .pill.off{color:var(--crit)}
-button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit}
-button:hover:not(:disabled){background:#27324a}
+body{background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,"Segoe UI",sans-serif;height:100vh;display:flex;overflow:hidden}
+button{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:7px 12px;cursor:pointer;font:inherit}
+button:hover:not(:disabled){background:var(--panel2);border-color:var(--acc2)}
 button:disabled{opacity:.4;cursor:default}
-button:focus-visible,summary:focus-visible{outline:2px solid #6aa8ff;outline-offset:2px}
-button.danger{background:#5a1f22;border-color:#8a2c30}
-button.warnb{background:#4d3b0b;border-color:#7a5f12}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.danger{background:#ffe2e5;border-color:#ffc6cd;color:#b3273a}
+button.warnb{background:#fff3d9;border-color:#ffd98a;color:#8a5b00}
+button.okb{background:#dcf5ea;border-color:#aee8d0;color:#0f7a4d}
 button.big{padding:10px 16px;font-weight:700}
-details.demo{position:relative}
-details.demo summary{cursor:pointer;list-style:none;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
-details.demo div{position:absolute;right:0;top:36px;z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;width:190px}
-#status{display:flex;align-items:center;gap:16px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
-#status .lvl{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
+.pill{font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.pill.on{color:var(--ok);border-color:#aee8d0} .pill.off{color:var(--crit);border-color:#ffc6cd}
+
+/* ---------- SOL SIDEBAR ---------- */
+#sidebar{width:225px;min-width:225px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;letter-spacing:.3px}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+nav{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.nav{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--mut);font-weight:600}
+.nav:hover{background:var(--panel2);color:var(--txt)}
+.nav.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;box-shadow:0 4px 12px rgba(108,92,231,.35)}
+#sidebar .sp{flex:1}
+details.demo{margin-top:4px}
+details.demo summary{cursor:pointer;list-style:none;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-weight:600;color:var(--acc)}
+details.demo div{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.side-foot{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.side-foot .row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--mut)}
+
+/* ---------- SAĞ İÇERİK ---------- */
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+#status{display:flex;align-items:center;gap:18px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+#status .lvl{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}
 #status .dot{width:12px;height:12px;border-radius:50%;background:var(--ok)}
-#status.warning{background:#2b2210} #status.warning .dot{background:var(--warn)}
-#status.critical{background:#321416} #status.critical .dot{background:var(--crit)}
-.stats{margin-left:auto;display:flex;gap:18px;color:var(--mut)} .stats b{color:var(--txt);font-size:16px;margin-left:4px}
-#banner{display:none;padding:10px 18px;font-weight:700;background:var(--warn);color:#201800;align-items:center;gap:12px}
+#status.warning .dot{background:var(--warn)} #status.critical .dot{background:var(--crit)} #status.green .dot{background:var(--green)}
+#status.warning{background:#fff8e8} #status.critical{background:#ffecee} #status.green{background:#eafaf2}
+.stats{margin-left:auto;display:flex;gap:12px;color:var(--mut);flex-wrap:wrap}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:4px 12px;font-size:12px}
+.stat b{color:var(--txt);font-size:16px;margin-left:4px}
+.stat.crit b{color:var(--crit)} .stat.warn b{color:#d98e00} .stat.ok b{color:var(--ok)}
+#banner{display:none;padding:10px 20px;font-weight:700;background:var(--warn);color:#6a4a00;align-items:center;gap:12px}
 #banner.show{display:flex}
-main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
-#cams{padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;align-content:start;overflow:auto}
-.cam{background:var(--panel);border:2px solid var(--line);border-radius:8px;overflow:hidden;cursor:zoom-in}
-.cam.warning{border-color:var(--warn)} .cam.critical{border-color:var(--crit)}
+#banner.green{background:var(--ok);color:#eafff5}
+.content{flex:1;overflow:auto;padding:18px 20px}
+.page.hidden{display:none}
+
+/* Kamera kartları */
+#cams{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;align-content:start}
+.cam{background:var(--panel);border:2px solid var(--line);border-radius:14px;overflow:hidden;cursor:zoom-in;box-shadow:0 2px 6px rgba(43,47,69,.06)}
+.cam.warning{border-color:var(--warn)} .cam.critical{border-color:var(--crit)} .cam.green{border-color:var(--green)}
 .cam.big{grid-column:1/-1;cursor:zoom-out}
-.cam img{width:100%;display:block;background:#000;aspect-ratio:4/3;object-fit:cover}
-.cam.big img{aspect-ratio:16/9}
-.cam .t{padding:8px 12px;display:flex;gap:10px;align-items:center}
+.cam img{width:100%;display:block;background:#dde0ea;aspect-ratio:16/9;object-fit:contain}
+.cam .t{padding:9px 12px;display:flex;gap:10px;align-items:center}
 .cam .t .fps{margin-left:auto;color:var(--mut);font-size:12px}
-.chip{font-size:12px;border-radius:99px;padding:1px 9px;border:1px solid var(--line);color:var(--mut)}
-.chip.ok{color:var(--ok);border-color:#235a43} .chip.bad{color:var(--crit);border-color:#7a2a2a} .chip.mute{color:var(--mut)}
-.chip.warning{color:var(--warn);border-color:#7a5f12} .chip.critical{color:var(--crit);border-color:#7a2a2a}
-aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.tabs{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.tabs button.on{background:#27324a;border-color:#3b4a6b}
-#log{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
-.row{background:var(--panel);border-left:5px solid var(--warn);border-radius:6px;padding:10px}
+.chip{font-size:12px;border-radius:99px;padding:2px 10px;border:1px solid var(--line);color:var(--mut);background:var(--panel2)}
+.chip.ok{color:var(--ok);border-color:#aee8d0} .chip.bad{color:var(--crit);border-color:#ffc6cd} .chip.mute{color:var(--mut)}
+.chip.warning{color:#d98e00;border-color:#ffd98a} .chip.critical{color:var(--crit);border-color:#ffc6cd}
+.chip.green{color:var(--ok);border-color:#aee8d0}
+
+/* Uyarılar sekmesi */
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#log{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--panel);border-left:5px solid var(--warn);border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(43,47,69,.05)}
 .row.critical{border-left-color:var(--crit)}
+.row.green{border-left-color:var(--green)}
 .row.ack{opacity:.75} .row.false_alarm{opacity:.4}
-.row .h{display:flex;justify-content:space-between;gap:8px}
+.row .h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .row .m{color:var(--mut);font-size:12px;margin:2px 0 6px}
-.row img{width:100%;border-radius:4px;cursor:zoom-in}
+.row img{width:100%;border-radius:8px;cursor:zoom-in;border:1px solid var(--line)}
 .chips{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
-.btns{display:flex;gap:5px;flex-wrap:wrap} .btns button{font-size:12px;padding:4px 8px}
-.empty{color:var(--mut);padding:16px;text-align:center}
-#settings{border-top:1px solid var(--line);padding:10px 14px;background:var(--panel)}
-#settings summary{cursor:pointer;color:var(--mut)}
-#settings label{display:block;margin-top:10px;font-size:12px;color:var(--mut)}
-#settings input{width:100%}
-#vignette{position:fixed;inset:0;pointer-events:none;display:none;z-index:50;box-shadow:inset 0 0 0 6px var(--crit),inset 0 0 140px rgba(255,40,40,.6);animation:pulse .9s ease-in-out infinite alternate}
+.btns{display:flex;gap:5px;flex-wrap:wrap} .btns button{font-size:12px;padding:4px 9px}
+.empty{color:var(--mut);padding:26px;text-align:center}
+
+/* Ayarlar sekmesi */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:520px;margin-bottom:14px;box-shadow:0 2px 6px rgba(43,47,69,.05)}
+.card h3{font-size:15px;margin-bottom:4px}
+.card p{color:var(--mut);font-size:12px;margin-bottom:10px}
+.card label{display:block;margin-top:12px;font-size:12px;color:var(--mut);font-weight:600}
+.card input[type=range]{width:100%;accent-color:var(--acc)}
+
+/* Overlay'lar */
+#vignette{position:fixed;inset:0;pointer-events:none;display:none;z-index:50;box-shadow:inset 0 0 0 6px var(--crit),inset 0 0 140px rgba(255,91,106,.55);animation:pulse .9s ease-in-out infinite alternate}
 @keyframes pulse{from{opacity:.4}to{opacity:1}}
-#ocard{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:51;display:none;background:#3a1114;border:2px solid var(--crit);border-radius:10px;padding:14px 18px;min-width:min(560px,92vw);text-align:center}
-#ocard h2{font-size:20px;color:#fff;margin-bottom:4px} #ocard p{color:#ffc9c9;margin-bottom:10px}
-#ocard .btns{justify-content:center}
-.show{display:block}
+#ocard{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:51;display:none;background:#ffdde1;border:2px solid var(--crit);border-radius:14px;padding:16px 20px;min-width:min(560px,92vw);text-align:center;box-shadow:0 8px 30px rgba(179,39,58,.25)}
+#ocard h2{font-size:20px;color:#8f1c2d;margin-bottom:4px} #ocard p{color:#a33a49;margin-bottom:10px}
+#ocard .btns{justify-content:center;display:flex;gap:8px;flex-wrap:wrap}
+#vignette.show{display:block}#ocard.show{display:block}
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:60;align-items:center;justify-content:center;cursor:zoom-out}
 #modal.show{display:flex} #modal img{max-width:92vw;max-height:92vh;border-radius:8px}
 @media (prefers-reduced-motion:reduce){#vignette{animation:none}}
-@media(max-width:950px){body{overflow:auto;height:auto}main{grid-template-columns:1fr}aside{border-left:0;border-top:1px solid var(--line)}#log{max-height:60vh}}
+@media(max-width:920px){body{flex-direction:column;height:auto;overflow:auto}#sidebar{width:100%;min-width:0;border-right:0;border-bottom:1px solid var(--line)}nav{flex-direction:row;flex-wrap:wrap}#content{overflow:visible}.content{padding:12px}#cams{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
-  <h1>XNOR Guard</h1>
-  <span class="pill off" id="conn">bağlanıyor</span>
-  <span class="pill" id="p-cams">kamera: –</span>
-  <span class="pill" id="p-tg">Telegram: –</span>
-  <span class="sp"></span>
-  <button id="snd" onclick="toggleSound()">Sesi aç</button>
-  <details class="demo"><summary>Demo</summary><div>
+<aside id="sidebar">
+  <div class="brand"><span class="logo">🛡</span>XNOR Guard</div>
+  <nav>
+    <button class="nav on" data-tab="cameras">📹 Canlı İzleme</button>
+    <button class="nav" data-tab="alerts">🚨 Uyarılar</button>
+    <button class="nav" data-tab="settings">⚙️ Ayarlar</button>
+  </nav>
+  <div class="sp"></div>
+  <details class="demo"><summary>⚡ Demo test</summary><div>
     <button class="warnb" onclick="sim('warning','fight')">Kavga (sarı)</button>
+    <button class="warnb" onclick="sim('warning','loitering')">Şüpheli bekleyiş (sarı)</button>
     <button class="warnb" onclick="sim('warning','knife')">Bıçak (sarı)</button>
+    <button class="okb" onclick="sim('green','cigarette')">Sigara (yeşil)</button>
     <button class="danger" onclick="sim('critical','gun')">Silah (kırmızı)</button>
+    <button class="danger" onclick="sim('critical','suicide')">Camdan atlama (kırmızı)</button>
   </div></details>
-</header>
-
-<section id="status" class="normal">
-  <div class="lvl"><span class="dot"></span><span id="lvl-text">Okul durumu: normal</span></div>
-  <div class="stats">
-    <span>Açık alarm<b id="s-open">0</b></span><span>Sarı<b id="s-warn">0</b></span>
-    <span>Kırmızı<b id="s-crit">0</b></span><span>Yanlış alarm<b id="s-fa">0</b></span>
+  <div class="side-foot">
+    <div class="row"><span>Durum</span><span class="pill" id="conn">bağlanıyor</span></div>
+    <div class="row"><span>Kamera</span><span class="pill" id="p-cams">–</span></div>
+    <div class="row"><span>Telegram</span><span class="pill" id="p-tg">–</span></div>
+    <button id="snd" onclick="toggleSound()">🔊 Sesi aç</button>
   </div>
-</section>
-
-<div id="banner"><span id="banner-text"></span><button onclick="ackCurrent()">Görüldü</button></div>
+</aside>
 
 <main>
-  <section id="cams"></section>
-  <aside>
-    <div class="tabs">
-      <button data-f="all" class="on">Tümü</button><button data-f="warning">Sarı</button>
-      <button data-f="critical">Kırmızı</button><button data-f="open">Açık</button>
+  <section id="status" class="normal">
+    <div class="lvl"><span class="dot"></span><span id="lvl-text">Okul durumu: normal</span></div>
+    <div class="stats">
+      <span class="stat warn">Açık alarm<b id="s-open">0</b></span>
+      <span class="stat ok">Yeşil<b id="s-green">0</b></span>
+      <span class="stat warn">Sarı<b id="s-warn">0</b></span>
+      <span class="stat crit">Kırmızı<b id="s-crit">0</b></span>
+      <span class="stat">Yanlış alarm<b id="s-fa">0</b></span>
     </div>
-    <div id="log"><div class="empty" id="empty">Henüz tehdit algılanmadı.</div></div>
-    <details id="settings"><summary>Hassasiyet ayarları</summary>
-      <label>Nesne güveni: <b id="v-conf"></b><input type="range" id="r-conf" min="0.15" max="0.9" step="0.05"></label>
-      <label>Kavga eşiği (düşük = daha hassas): <b id="v-fs"></b><input type="range" id="r-fs" min="2" max="9" step="0.5"></label>
-    </details>
-  </aside>
+  </section>
+
+  <div id="banner"><span id="banner-text"></span><button onclick="ackCurrent()">Görüldü</button></div>
+
+  <div class="content">
+    <section class="page" id="page-cameras"><div id="cams"></div></section>
+
+    <section class="page hidden" id="page-alerts">
+      <div class="tabs">
+        <button data-f="all" class="on">Tümü</button><button data-f="green">Yeşil</button><button data-f="warning">Sarı</button>
+        <button data-f="critical">Kırmızı</button><button data-f="open">Açık</button>
+      </div>
+      <div id="log"><div class="empty" id="empty">Henüz tehdit algılanmadı.</div></div>
+    </section>
+
+    <section class="page hidden" id="page-settings">
+      <div class="card">
+        <h3>Hassasiyet ayarları</h3>
+        <p>Eşikler arayüzden anında değiştirilebilir; düşük değer = daha hassas.</p>
+        <label>Nesne güveni: <b id="v-conf"></b><input type="range" id="r-conf" min="0.25" max="0.95" step="0.05"></label>
+        <label>Kavga eşiği (düşük = daha hassas): <b id="v-fs"></b><input type="range" id="r-fs" min="2" max="9" step="0.5"></label>
+      </div>
+      <div class="card">
+        <h3>Alarm davranışı</h3>
+        <p>Kritik tehdit: siren + müdür aranır + polise bildirim + Telegram. Uyarı (sarı): pan &amp; Telegram; onaylanmazsa kritiğe yükselir.</p>
+      </div>
+    </section>
+  </div>
 </main>
 
 <div id="vignette"></div>
@@ -117,7 +172,7 @@ aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-h
   <h2 id="o-title"></h2><p id="o-text"></p>
   <div class="btns">
     <button class="big" onclick="ackCurrent()">Görüldü, alarmı sustur</button>
-    <button class="big danger" onclick="act(curCrit,'call_police')">Polisi bildir</button>
+    <button class="big danger" id="o-police" onclick="act(curCrit,'call_police')">Polisi bildir</button>
     <button class="big" onclick="act(curCrit,'false_alarm')">Yanlış alarm</button>
   </div>
 </div>
@@ -126,14 +181,22 @@ aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-h
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const LBL = {gun:"Silah", handgun:"Tabanca", rifle:"Tüfek", knife:"Bıçak", fight:"Kavga / vurma", climb:"Tırmanma / izinsiz giriş", scissors:"Makas"};
+const LBL = {gun:"Silah", handgun:"Tabanca", rifle:"Tüfek", knife:"Bıçak", fight:"Kavga / vurma", climb:"Tırmanma / izinsiz giriş", scissors:"Makas", suicide:"İntihar / camdan atlama", cigarette:"Sigara", loitering:"Şüpheli bekleyiş", smoking:"Sigara içme", smoke:"Sigara/duman"};
 const ACT = {telegram_sent:"Telegram gönderildi", telegram_manual:"Telegram tekrar gönderildi",
   principal_notified:"Müdür paneline uyarı", principal_called:"Müdür aranıyor", principal_called_manual:"Müdür manuel arandı",
   police_notified:"Polise bildirildi", police_notified_manual:"Polise manuel bildirildi",
   escalated:"Kritiğe yükseltildi", ack:"Görüldü", false_alarm:"Yanlış alarm"};
 const STATUS = {open:"açık", ack:"görüldü", false_alarm:"yanlış alarm"};
 const EV = new Map();
+const LEVEL = {critical:"Kritik", warning:"Potansiyel", green:"Gözlem"};
 let filter = "all", curCrit = null, curWarn = null, bannerTimer;
+
+/* ---------- Sekme gezinmesi ---------- */
+function showTab(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("hidden", p.id !== "page-"+name));
+  document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("on", b.dataset.tab===name));
+}
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 
 /* ---------- Ses: sarı = kısa çift bip, kırmızı = sürekli siren ---------- */
 const Snd = {
@@ -152,8 +215,8 @@ const Snd = {
   stopSiren(){ clearTimeout(this.timeout); if(this.siren){ try{this.siren.o.stop();this.siren.lfo.stop();}catch(e){} this.siren=null; } }
 };
 function toggleSound(){
-  if(Snd.on){ Snd.on=false; Snd.stopSiren(); $("#snd").textContent="Sesi aç"; }
-  else { Snd.enable(); $("#snd").textContent="Ses açık"; Snd.warning(); if(curCrit) Snd.startSiren(); }
+  if(Snd.on){ Snd.on=false; Snd.stopSiren(); $("#snd").textContent="🔊 Sesi aç"; }
+  else { Snd.enable(); $("#snd").textContent="🔇 Ses açık"; Snd.warning(); if(curCrit) Snd.startSiren(); }
 }
 
 /* ---------- Kamera kartları ---------- */
@@ -164,14 +227,15 @@ async function loadCameras(){
       <img src="/video_feed/${c.id}" alt="${esc(c.name)}">
       <div class="t"><b>${esc(c.name)}</b><span class="chip" id="st-${c.id}">normal</span><span class="fps" id="fps-${c.id}"></span></div>
     </div>`).join("");
-  $("#p-cams").textContent = `kamera: ${cams.length}`;
+  $("#p-cams").textContent = `${cams.length}`;
 }
 async function pollCameras(){
   try{
     for(const c of await (await fetch("/api/cameras")).json()){
       const st=$("#st-"+c.id); if(!st) continue;
-      st.textContent = {normal:"normal",warning:"dikkat",critical:"kritik"}[c.state]; st.className="chip "+(c.state==="normal"?"ok":c.state);
+      st.textContent = {normal:"normal",green:"gözlem",warning:"dikkat",critical:"kritik"}[c.state]; st.className="chip "+(c.state==="normal"?"ok":c.state);
       $("#fps-"+c.id).textContent = c.fps+" fps";
+      $("#cam-"+c.id).classList.toggle("green", c.state==="green");
       $("#cam-"+c.id).classList.toggle("warning", c.state==="warning");
       $("#cam-"+c.id).classList.toggle("critical", c.state==="critical");
     }
@@ -184,15 +248,15 @@ function rowHTML(ev){
     const st = a.detail && a.detail.status, c = st==="failed"?"bad":st==="skipped"?"mute":"ok";
     return `<span class="chip ${c}" title="${esc((a.detail&&(a.detail.error||a.detail.reason))||"")}">${ACT[a.action]||esc(a.action)}${st==="skipped"?" (ayarlı değil)":st==="failed"?" (başarısız)":""}</span>`;
   }).join("");
-  return `<div class="h"><b>${ev.level==="critical"?"Kritik":"Potansiyel"} · ${LBL[ev.label]||esc(ev.label)} <small>%${Math.round(ev.conf*100)}</small></b>
+  return `<div class="h"><b>${LEVEL[ev.level]||"Olay"} · ${LBL[ev.label]||esc(ev.label)} <small>%${Math.round(ev.conf*100)}</small></b>
       <span>${new Date(ev.ts).toLocaleTimeString("tr-TR")}</span></div>
-    <div class="m">${esc(ev.camera_name)} · ${STATUS[ev.status]}${ev.escalated?" · yükseltildi":""}</div>
+    <div class="m">${esc(ev.camera_name)} · ${STATUS[ev.status]}${ev.escalated?" · yükseltildi":""}${ev.source?" · kaynak: "+esc(ev.source):""}</div>
     <img src="${ev.snapshot}" alt="Olay görüntüsü" onclick="zoom(this.src)" onerror="this.remove()">
     <div class="chips">${chips}</div>
     <div class="btns">
       <button onclick="act('${ev.id}','ack')" ${ev.status==="open"?"":"disabled"}>Görüldü</button>
       <button onclick="act('${ev.id}','call_principal')">Müdürü ara</button>
-      <button class="danger" onclick="act('${ev.id}','call_police')">Polisi bildir</button>
+      <button class="danger" onclick="act('${ev.id}','call_police')" ${(ev.police_ready||ev.level==="critical")?"":"disabled"}>Polisi bildir</button>
       <button onclick="act('${ev.id}','telegram')">Telegram'a gönder</button>
       <button onclick="act('${ev.id}','false_alarm')">Yanlış alarm</button>
     </div>`;
@@ -211,9 +275,11 @@ function applyFilter(){
 }
 function updateStatus(){
   const all=[...EV.values()], open=all.filter(e=>e.status==="open");
-  $("#s-open").textContent=open.length; $("#s-warn").textContent=all.filter(e=>e.level==="warning").length;
+  $("#s-open").textContent=open.length; $("#s-green").textContent=all.filter(e=>e.level==="green").length;
+  $("#s-warn").textContent=all.filter(e=>e.level==="warning").length;
   $("#s-crit").textContent=all.filter(e=>e.level==="critical").length; $("#s-fa").textContent=all.filter(e=>e.status==="false_alarm").length;
-  const lvl = open.some(e=>e.level==="critical") ? "critical" : open.length ? "warning" : "normal";
+  const openHigh = open.filter(e=>e.level!=="green");
+  const lvl = open.some(e=>e.level==="critical") ? "critical" : openHigh.length ? "warning" : "normal";
   $("#status").className = lvl;
   $("#lvl-text").textContent = {normal:"Okul durumu: normal", warning:"Okul durumu: dikkat, onay bekleyen uyarı var", critical:"Okul durumu: KRİTİK tehdit"}[lvl];
 }
@@ -223,15 +289,26 @@ function showCritical(ev, silent){
   curCrit = ev.id;
   $("#o-title").textContent = `KRİTİK TEHDİT: ${LBL[ev.label]||ev.label}`;
   $("#o-text").textContent = `${ev.camera_name}. Müdür aranıyor, polise bildirim ve Telegram mesajı gönderiliyor.`;
+  $("#o-police").disabled = !(ev.police_ready || ev.level==="critical");
+  $("#banner").classList.remove("green");
   $("#vignette").classList.add("show"); $("#ocard").classList.add("show"); $("#banner").classList.remove("show");
   if(!silent) Snd.startSiren();
 }
 function hideCritical(){ curCrit=null; $("#vignette").classList.remove("show"); $("#ocard").classList.remove("show"); Snd.stopSiren(); }
 function showWarning(ev){
   curWarn = ev.id;
-  $("#banner-text").textContent = `Olası tehdit: ${LBL[ev.label]||ev.label} · ${ev.camera_name}. Müdür paneline uyarı gitti, ${"{{S}}"} sn içinde onaylanmazsa kritiğe yükselir.`.replace("{{S}}", "45");
+  $("#banner").classList.remove("green");
+  $("#banner-text").textContent = `Olası tehdit: ${LBL[ev.label]||ev.label} · ${ev.camera_name}. Müdür paneline uyarı gitti, 45 sn içinde onaylanmazsa kritiğe yükselir.`;
   $("#banner").classList.add("show"); Snd.warning();
   clearTimeout(bannerTimer); bannerTimer = setTimeout(()=>$("#banner").classList.remove("show"), 45000);
+}
+function showGreen(ev){
+  curWarn = ev.id;
+  $("#banner").classList.add("green");
+  $("#banner-text").textContent = `Gözlem: ${LBL[ev.label]||ev.label} · ${ev.camera_name}. Müdür paneline sessiz log gönderildi.`;
+  $("#banner").classList.add("show");
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(()=>{ $("#banner").classList.remove("show"); $("#banner").classList.remove("green"); }, 8000);
 }
 const ackCurrent = () => { const id = curCrit || curWarn; if(id) act(id,"ack"); };
 
@@ -247,7 +324,9 @@ function connect(){
   ws.onclose = () => { clearInterval(ping); $("#conn").className="pill off"; $("#conn").textContent="bağlantı koptu"; setTimeout(connect,1500); };
   ws.onmessage = e => {
     const m = JSON.parse(e.data);
-    if(m.type==="alert"){ EV.set(m.event.id,m.event); renderRow(m.event); m.event.level==="critical" ? showCritical(m.event) : showWarning(m.event); }
+    if(m.type==="alert"){ EV.set(m.event.id,m.event); renderRow(m.event);
+      const lv=m.event.level;
+      if(lv==="critical") showCritical(m.event); else if(lv==="green") showGreen(m.event); else showWarning(m.event); }
     if(m.type==="escalated"){ EV.set(m.event.id,m.event); renderRow(m.event); showCritical(m.event); }
     if(m.type==="action"){
       const ev = EV.get(m.event_id); if(!ev) return;
@@ -262,7 +341,7 @@ function connect(){
 async function loadSettings(){
   const s = await (await fetch("/api/settings")).json();
   $("#r-conf").value=s.conf; $("#v-conf").textContent=s.conf; $("#r-fs").value=s.fight_speed; $("#v-fs").textContent=s.fight_speed;
-  const tg=$("#p-tg"); tg.textContent = s.telegram ? "Telegram: bağlı" : "Telegram: ayarsız"; tg.className = "pill " + (s.telegram?"on":"");
+  const tg=$("#p-tg"); tg.textContent = s.telegram ? "bağlı" : "ayarsız"; tg.className = "pill " + (s.telegram?"on":"");
 }
 function bindSettings(){
   const send = () => { $("#v-conf").textContent=$("#r-conf").value; $("#v-fs").textContent=$("#r-fs").value;
@@ -276,7 +355,8 @@ function bindSettings(){
 (async()=>{
   bindSettings(); await loadCameras(); await loadSettings();
   (await (await fetch("/api/logs")).json()).reverse().forEach(ev=>{ EV.set(ev.id,ev); renderRow(ev); });
-  const openCrit=[...EV.values()].find(e=>e.level==="critical" && e.status==="open"); if(openCrit) showCritical(openCrit,true);
+  const openCrit=[...EV.values()].find(e=>e.level==="critical" && e.status==="open");
+  if(openCrit) showCritical(openCrit,true);
   connect(); setInterval(pollCameras,2000);
 })();
 </script>

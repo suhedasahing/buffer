@@ -4,7 +4,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from . import config, alerts, notifier
+from . import config, alerts, notifier, sound, active_learning
 from .detector import ThreatDetector
 from .camera import CameraWorker
 
@@ -38,10 +38,15 @@ async def log_action(ev_id: str, action: str, detail):
         ev["actions"].append({"action": action, "detail": detail, "ts": int(time.time() * 1000)})
         if action == "false_alarm":
             ev["status"] = "false_alarm"
+            active_learning.save(ev, "negative")   # aktif öğrenme: negatif örnek
         elif action in HANDLED and ev["status"] == "open":
             ev["status"] = "ack"
+            active_learning.save(ev, "positive")   # aktif öğrenme: doğrulanmış pozitif örnek
         status = ev["status"]
     await broadcast({"type": "action", "event_id": ev_id, "action": action, "detail": detail, "status": status})
+    # 🔴 Siren, alarm "görüldü" veya "yanlış alarm" işaretlenince susturulur.
+    if action in ("ack", "false_alarm"):
+        sound.stop_siren()
 
 
 async def step(ev_id: str, action: str, coro):
@@ -49,8 +54,14 @@ async def step(ev_id: str, action: str, coro):
 
 
 async def run_policy(ev: dict):
-    """Seviyeye göre otomatik aksiyonlar (config.POLICY)."""
+    """Seviyeye göre otomatik aksiyonlar (config.POLICY) + bilgisayar sesi."""
     p = config.POLICY[ev["level"]]
+    # 🔊 3 kademeli ses: yeşil=sessiz, sarı=kısa uyarı sesi, kırmızı=siren
+    mode = p.get("sound", "none")
+    if mode == "warning":
+        sound.warning()
+    elif mode == "siren":
+        sound.start_siren()
     if not p["call_principal"]:
         await log_action(ev["id"], "principal_notified", "Müdür paneline uyarı düştü")
     if p["telegram"]:
@@ -65,6 +76,7 @@ async def escalation_timer(ev: dict, delay: int):
     await asyncio.sleep(delay)
     if ev["status"] == "open" and ev["level"] == "warning":
         ev["level"], ev["escalated"] = "critical", True
+        ev["police_ready"] = config.POLICY["critical"].get("police_ready", True)
         await broadcast({"type": "escalated", "event": ev})
         await log_action(ev["id"], "escalated", f"{delay} sn içinde onaylanmadı, KRİTİK'e yükseltildi")
         await run_policy(ev)
@@ -72,6 +84,8 @@ async def escalation_timer(ev: dict, delay: int):
 
 async def handle_event(ev: dict):
     ev["id"], ev["status"], ev["actions"], ev["escalated"] = uuid.uuid4().hex[:8], "open", [], False
+    # 🔴 "Polise Bildir" butonunu aktifleştiren veri flag'i
+    ev["police_ready"] = config.POLICY[ev["level"]].get("police_ready", False)
     LOGS.insert(0, ev)
     del LOGS[200:]
     await broadcast({"type": "alert", "event": ev})
@@ -90,7 +104,12 @@ async def lifespan(app: FastAPI):
     global LOOP
     LOOP = asyncio.get_running_loop()
     detector = ThreatDetector()
-    fight_model = ThreatDetector(config.FIGHT_MODEL_PATH, "FIGHT_CONF") if config.FIGHT_MODEL_PATH else None
+    active_learning.register("weapon", detector.model_names)
+    # 🟡 Sarı alarm: eğitilmiş kavga/tırmanma modeli (fight.pt) varsa yükle.
+    fight_model = None
+    if config.FIGHT_MODEL_PATH:
+        fight_model = ThreatDetector(config.FIGHT_MODEL_PATH, config.FIGHT_CONF, source="fight_model")
+        active_learning.register("fight_model", fight_model.model_names)
     for cid, cfg in config.CAMERAS.items():
         w = CameraWorker(cid, cfg, detector, on_event_threadsafe, fight_model)
         WORKERS[cid] = w
@@ -173,7 +192,7 @@ def get_settings():
 @app.post("/api/settings")
 def set_settings(s: SettingsReq):
     if s.conf is not None:
-        config.CONF = max(0.05, min(0.95, s.conf))
+        config.CONF = max(0.25, min(0.95, s.conf))  # gerçek silahı da yakalayacak aralık
     if s.fight_speed is not None:
         config.FIGHT_SPEED = max(1.0, min(15.0, s.fight_speed))
     return get_settings()
@@ -182,9 +201,10 @@ def set_settings(s: SettingsReq):
 @app.post("/api/simulate")
 async def simulate(level: str = "critical", camera: str = "cam1", label: str = ""):
     w = WORKERS.get(camera)
-    if not w or level not in ("warning", "critical"):
+    if not w or level not in ("green", "warning", "critical"):
         raise HTTPException(400, "camera/level hatalı")
-    w.emit(level, label or ("gun" if level == "critical" else "fight"), 0.91)
+    default = {"critical": "gun", "warning": "fight", "green": "cigarette"}[level]
+    w.emit(level, label or default, 0.91)
     return {"ok": True}
 
 

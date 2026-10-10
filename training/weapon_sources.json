@@ -1,0 +1,34 @@
+{
+  "_docs": "Her kaynak: path (root), dirs (her satir: split adi + 'dir' = img/labels iceren grup klasoru), class_map (kaynak sinif id -> hedef 0=weapon). weapons-raw sinif id'leri dogrulandi (pistol=0 rifle=1 knife=2 grenade=3 heavy_gun=4 person=5; person(5) dusuyor). weapon-2 Roboflow YOLOv8 indirmesi (guns=0 knife=1, ikisi de -> weapon). gun_detect_1 sabanci klasor.",
+  "sources": [
+    {
+      "name": "gun_detect_1",
+      "path": "Gun-Detect-1",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "valid", "dir": "valid"}
+      ],
+      "class_map": {"0": 0, "1": 0, "2": 0}
+    },
+    {
+      "name": "weapon2_rf",
+      "path": "../datasets/weapon-2",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"0": 0, "1": 0},
+      "resplit": {"seed": 42, "frac": {"train": 0.8, "val": 0.1, "test": 0.1}}
+    },
+    {
+      "name": "weapons_raw",
+      "path": "../datasets/weapons-detection-raw/merged",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "val", "dir": "val"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}
+    }
+  ]
+}

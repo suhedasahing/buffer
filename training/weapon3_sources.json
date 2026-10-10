@@ -1,0 +1,44 @@
+{
+  "_docs": "weapon_v3 icin: weapon_sources.json'daki 3 kaynak + Roboflow crime (bahria-university-g0y7w/crime-dp3x3 v10). crime sinif id'leri data.yaml'dan dogrulandi: 0=criminal 1=person 2=weapon -> sadece weapon(2) hedef 0'a; criminal/person dusuyor. Yollar go relidir; Colab notebook bunlari mutlak /content/... yapar.",
+  "sources": [
+    {
+      "name": "gun_detect_1",
+      "path": "Gun-Detect-1",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "valid", "dir": "valid"}
+      ],
+      "class_map": {"0": 0, "1": 0, "2": 0}
+    },
+    {
+      "name": "weapon2_rf",
+      "path": "../datasets/weapon-2",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"0": 0, "1": 0},
+      "resplit": {"seed": 42, "frac": {"train": 0.8, "val": 0.1, "test": 0.1}}
+    },
+    {
+      "name": "weapons_raw",
+      "path": "../datasets/weapons-detection-raw/merged",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "val", "dir": "val"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}
+    },
+    {
+      "name": "crime",
+      "path": "../datasets/crime-10",
+      "dirs": [
+        {"split": "train", "dir": "train"},
+        {"split": "valid", "dir": "valid"},
+        {"split": "test", "dir": "test"}
+      ],
+      "class_map": {"2": 0}
+    }
+  ]
+}

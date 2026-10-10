@@ -6,3 +6,13 @@ __pycache__/
 .venv/
 venv/
 node_modules/
+training/data/
+training/out/
+runs/
+snapshots/
+dataset/
+Gun-Detect-1/
+yolov8n.pt
+train.log
+train.err.log
+train.pid
